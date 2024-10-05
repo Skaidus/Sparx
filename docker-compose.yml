@@ -1,0 +1,7 @@
+version: '1'
+
+services:
+  sparx:
+    build: app/
+    ports:
+      - '8000:9009'

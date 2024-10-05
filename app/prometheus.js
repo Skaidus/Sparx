@@ -1,6 +1,7 @@
-const http = require("http");
+const express = require('express');
 const {prometheusHost, prometheusPort} = require("./config.json")
 
+const server = express();
 
 const Prometheus = require('prom-client');
 const register = new Prometheus.Registry();
@@ -13,16 +14,12 @@ const metricCommandCalls = new Prometheus.Counter({
 
 register.registerMetric(metricCommandCalls);
 
-const rqListener = function (req,res) {
-    if (req.url === '/metrics') {
-        res.writeHead(200);
-        register.metrics().then(data => res.end(data))
-    }
-};
+server.get('/metrics', async (req, res) => {
+    res.send(await register.metrics());
+});
 
-const server = http.createServer(rqListener);
-server.listen(prometheusPort,prometheusHost, () => {
-    console.log(`Prometheus server is up at ${prometheusHost}:${prometheusPort}`);
+server.listen(prometheusPort, () => {
+    console.log(`Prometheus server is up at port ${prometheusPort}`);
 })
 
 module.exports = {
